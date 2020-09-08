@@ -1,0 +1,9 @@
+version: '3.7'
+
+services:
+
+  buster:
+    image: datadog/dd-trace-ci:buster
+    build:
+      context: shared-context
+      dockerfile: $PWD/buster/Dockerfile

@@ -1,0 +1,110 @@
+#!/bin/sh
+set -e
+
+# NOTICE: Modifying this file will cause all the PHP 7 builds to get rebuilt
+
+phpVersion=$1
+phpTarUrl=$2
+
+if [ -z "${phpVersion}" ]; then
+    echo "Please specify a PHP version"
+    exit 1
+fi
+if [ -z "${phpTarUrl}" ]; then
+    echo "Please specify a .tar.gz file to download"
+    exit 1
+fi
+if [ -z "${PHP_SRC_DIR}" ]; then
+    echo "Please set PHP_SRC_DIR"
+    exit 1
+fi
+if [ -z "${PHP_INSTALL_DIR}" ]; then
+    echo "Please set PHP_INSTALL_DIR"
+    exit 1
+fi
+
+srcDir=${PHP_SRC_DIR}/${phpVersion}
+installDir=${PHP_INSTALL_DIR}/${phpVersion}
+
+mkdir -p ${srcDir}
+cd ${srcDir}
+curl -fsSL -o /tmp/php.tar.gz "${phpTarUrl}"
+tar xf /tmp/php.tar.gz -C "${srcDir}" --strip-components=1
+rm -f /tmp/php.tar.gz
+./buildconf --force
+
+# --enable-zip on PHP <= 7.3 & --with-zip on PHP >= 7.4
+# @see https://www.php.net/manual/en/zip.installation.php
+sharedConfig="
+    --enable-cgi \
+    --enable-embed \
+    --enable-fpm \
+    --enable-ftp \
+    --enable-mbstring \
+    --enable-opcache \
+    --enable-phpdbg \
+    --enable-sockets \
+    --enable-zip \
+    --with-curl \
+    --with-fpm-user=www-data \
+    --with-fpm-group=www-data \
+    --with-libedit \
+    --with-mhash \
+    --with-mysqli=mysqlnd \
+    --with-openssl \
+    --with-pdo-mysql=mysqlnd \
+    --with-pdo-pgsql \
+    --with-pdo-sqlite \
+    --with-pear \
+    --with-readline \
+    --with-zip \
+    --with-zlib
+"
+
+if [ "$phpVersion" = "7.4" ]; then
+    # ASan + ZTS + debug build
+    ./configure \
+        ${sharedConfig} \
+        --enable-debug \
+        --enable-maintainer-zts \
+        --prefix=${installDir}-debug-zts-asan \
+        --with-config-file-path=${installDir}-debug-zts-asan \
+        --with-config-file-scan-dir=${installDir}-debug-zts-asan/conf.d \
+        CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC' \
+        LDFLAGS='-fsanitize=undefined,address'
+else
+    # ZTS + debug build
+    ./configure \
+        ${sharedConfig} \
+        --enable-debug \
+        --enable-maintainer-zts \
+        --prefix=${installDir}-debug-zts \
+        --with-config-file-path=${installDir}-debug-zts \
+        --with-config-file-scan-dir=${installDir}-debug-zts/conf.d
+fi
+make clean
+make -j "$((`nproc`+1))"
+make install
+
+# Debug build
+./configure \
+    ${sharedConfig} \
+    --enable-debug \
+    --prefix=${installDir}-debug \
+    --with-config-file-path=${installDir}-debug \
+    --with-config-file-scan-dir=${installDir}-debug/conf.d
+make clean
+make -j "$((`nproc`+1))"
+make install
+
+# Non-debug build
+./configure \
+    ${sharedConfig} \
+    --prefix=${installDir} \
+    --with-config-file-path=${installDir} \
+    --with-config-file-scan-dir=${installDir}/conf.d
+make clean
+make -j "$((`nproc`+1))"
+make install
+
+make clean
