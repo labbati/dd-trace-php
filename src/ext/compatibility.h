@@ -5,6 +5,15 @@
 #include <Zend/zend.h>
 #include <php_version.h>
 
+#if PHP_VERSION_ID >= 80000
+/* BC only */
+#define TSRMLS_D void
+#define TSRMLS_DC
+#define TSRMLS_C
+#define TSRMLS_CC
+#define TSRMLS_FETCH()
+#endif
+
 #define UNUSED_1(x) (void)(x)
 #define UNUSED_2(x, y) \
     do {               \
@@ -56,6 +65,10 @@
 #define COMPAT_RETVAL_STRING(c) RETVAL_STRING(c)
 #define ZVAL_VARARG_PARAM(list, arg_num) (&(((zval*)list)[arg_num]))
 #define IS_TRUE_P(x) (Z_TYPE_P(x) == IS_TRUE)
+#endif
+
+#if PHP_VERSION_ID < 50600
+#define ZEND_ARG_VARIADIC_INFO(pass_by_ref, name)
 #endif
 
 #if PHP_VERSION_ID < 70000

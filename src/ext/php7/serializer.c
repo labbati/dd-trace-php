@@ -233,7 +233,11 @@ static void _serialize_exception(zval *el, zval *meta, zend_object *exception_ob
     add_assoc_long(el, "error", 1);
 
     ZVAL_STR(&name, Z_OBJCE(exception)->name);
+#if PHP_VERSION_ID < 80000
     zend_call_method_with_0_params(&exception, Z_OBJCE(exception), NULL, "getmessage", &msg);
+#else
+    zend_call_method_with_0_params(exception_obj, Z_OBJCE(exception), NULL, "getmessage", &msg);
+#endif
 
     _add_assoc_zval_copy(meta, "error.type", &name);
     add_assoc_zval(meta, "error.msg", &msg);
@@ -242,7 +246,11 @@ static void _serialize_exception(zval *el, zval *meta, zend_object *exception_ob
      * function arguments can contain sensitive information. Since we do not
      * have a comprehensive way to know which function arguments are sensitive
      * we will just hide all of them. */
+#if PHP_VERSION_ID < 80000
     zend_call_method_with_0_params(&exception, Z_OBJCE(exception), NULL, "gettrace", &stack);
+#else
+    zend_call_method_with_0_params(exception_obj, Z_OBJCE(exception), NULL, "gettrace", &stack);
+#endif
     _serialize_stack_trace(meta, &stack);
     zval_ptr_dtor(&stack);
 }
