@@ -9,7 +9,7 @@ ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 VERSION:=$(shell cat src/DDTrace/version.php | grep return | awk '{print $$2}' | cut -d\' -f2)
 VERSION_WITHOUT_SUFFIX:=$(shell cat src/DDTrace/version.php | grep return | awk '{print $$2}' | cut -d\' -f2 | cut -d- -f1)
 
-INI_FILE := /usr/local/etc/php/conf.d/ddtrace.ini
+INI_FILE := $(shell php -i | grep 'Scan' | sed -e 's/Scan this dir for additional .ini files =>//g' | head -n 1 | awk '{print $$1}')/ddtrace.ini
 
 C_FILES := $(shell find src/{dogstatsd,ext} -name '*.c' -o -name '*.h' | awk '{ printf "$(BUILD_DIR)/%s\n", $$1 }' )
 TEST_FILES := $(shell find tests/ext -name '*.php*' -o -name '*.inc' | awk '{ printf "$(BUILD_DIR)/%s\n", $$1 }' )
