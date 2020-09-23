@@ -69,6 +69,7 @@ static void dd_set_up_deferred_loading_phpredis(void) {
     }
 
     DDTRACE_DEFERRED_INTEGRATION_LOADER("Redis", "__construct", "DDTrace\\Integrations\\PHPRedis\\PHPRedisIntegration");
+    DDTRACE_DEFERRED_INTEGRATION_LOADER("RedisCluster", "__construct", "DDTrace\\Integrations\\PHPRedis\\PHPRedisIntegration");
 }
 
 static void dd_set_up_deferred_loading_predis(void) {
