@@ -529,15 +529,15 @@
         ],
         "test-phpredis3": [
             "@composer scenario phpredis3",
-            "@composer test -- tests/Integrations/PHPRedis/PHPRedis3Test.php"
+            "@composer test -- tests/Integrations/PHPRedis/V3"
         ],
         "test-phpredis4": [
             "@composer scenario phpredis4",
-            "@composer test -- tests/Integrations/PHPRedis/PHPRedis4Test.php"
+            "@composer test -- tests/Integrations/PHPRedis/V4"
         ],
         "test-phpredis5": [
             "@composer scenario phpredis5",
-            "@composer test -- tests/Integrations/PHPRedis/PHPRedis5Test.php"
+            "@composer test -- tests/Integrations/PHPRedis/V5"
         ],
         "test-predis1": [
             "@composer scenario predis1",
