@@ -48,7 +48,7 @@ void ddtrace_downcase_zval(zval *src) {
 #endif
 
 #if PHP_VERSION_ID < 70000
-void ddtrace_convert_to_string(zval *dst, zval *src TSRMLS_DC) {
+void                                               ddtrace_convert_to_string(zval *dst, zval *src TSRMLS_DC) {
     switch (Z_TYPE_P(src)) {
         case IS_BOOL:
             if (Z_LVAL_P(src)) {
